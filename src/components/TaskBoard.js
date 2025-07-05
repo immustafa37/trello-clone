@@ -1,31 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Column from "./Column";
+import AddTaskModal from "./AddTaskModal";
+import SearchBar from "./SearchBar";
+import ProgressStats from "./ProgressStats";
 import { DragDropContext } from "react-beautiful-dnd";
+import { toast } from "react-toastify";
 
 const initialData = {
-  todo: {
-    title: "To Do",
-    tasks: [
-      { id: "1", content: "Learn React" },
-      { id: "2", content: "Watch tutorial" },
-    ],
-  },
-  doing: {
-    title: "Doing",
-    tasks: [{ id: "3", content: "Make a Trello Clone" }],
-  },
-  done: {
-    title: "Done",
-    tasks: [{ id: "4", content: "Install dependencies" }],
-  },
+  todo: [],
+  doing: [],
+  done: []
 };
 
 const TaskBoard = () => {
-  const [columns, setColumns] = useState(initialData);
+  const [columns, setColumns] = useState(() => {
+    const saved = localStorage.getItem("task-columns");
+    return saved ? JSON.parse(saved) : initialData;
+  });
 
-  const onDragEnd = (result) => {
+  const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("task-columns", JSON.stringify(columns));
+  }, [columns]);
+
+  const handleDragEnd = (result) => {
     const { source, destination } = result;
-
     if (!destination) return;
     if (
       source.droppableId === destination.droppableId &&
@@ -34,35 +35,70 @@ const TaskBoard = () => {
       return;
     }
 
-    const sourceColumn = columns[source.droppableId];
-    const destColumn = columns[destination.droppableId];
-    const sourceTasks = [...sourceColumn.tasks];
-    const destTasks = [...destColumn.tasks];
-
-    const [movedTask] = sourceTasks.splice(source.index, 1);
-    destTasks.splice(destination.index, 0, movedTask);
+    const sourceList = [...columns[source.droppableId]];
+    const [movedTask] = sourceList.splice(source.index, 1);
+    const destinationList = [...columns[destination.droppableId]];
+    destinationList.splice(destination.index, 0, movedTask);
 
     setColumns({
       ...columns,
-      [source.droppableId]: {
-        ...sourceColumn,
-        tasks: sourceTasks,
-      },
-      [destination.droppableId]: {
-        ...destColumn,
-        tasks: destTasks,
-      },
+      [source.droppableId]: sourceList,
+      [destination.droppableId]: destinationList
     });
   };
 
+  const addTask = (newTask) => {
+    setColumns((prev) => ({
+      ...prev,
+      todo: [...prev.todo, newTask]
+    }));
+    toast.success("Task added successfully!");
+  };
+
+  const updateTask = (columnId, taskId, updatedTask) => {
+    const updated = columns[columnId].map((task) =>
+      task.id === taskId ? { ...task, ...updatedTask } : task
+    );
+    setColumns({ ...columns, [columnId]: updated });
+    toast.success("Task updated.");
+  };
+
+  const deleteTask = (columnId, taskId) => {
+    const filtered = columns[columnId].filter((task) => task.id !== taskId);
+    setColumns({ ...columns, [columnId]: filtered });
+    toast.info("Task deleted.");
+  };
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="board">
-        {Object.entries(columns).map(([key, data]) => (
-          <Column key={key} droppableId={key} title={data.title} tasks={data.tasks} />
-        ))}
-      </div>
-    </DragDropContext>
+    <div>
+      <SearchBar search={search} setSearch={setSearch} />
+      <ProgressStats columns={columns} />
+      <button style={{ margin: "10px 0" }} onClick={() => setIsModalOpen(true)}>
+        ➕ Add Task
+      </button>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="board">
+          {Object.entries(columns).map(([key, tasks]) => (
+            <Column
+              key={key}
+              columnId={key}
+              title={key.toUpperCase()}
+              tasks={tasks.filter((t) =>
+                t.title.toLowerCase().includes(search.toLowerCase())
+              )}
+              updateTask={updateTask}
+              deleteTask={deleteTask}
+            />
+          ))}
+        </div>
+      </DragDropContext>
+      {isModalOpen && (
+        <AddTaskModal
+          onClose={() => setIsModalOpen(false)}
+          onAdd={addTask}
+        />
+      )}
+    </div>
   );
 };
 
