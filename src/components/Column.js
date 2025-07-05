@@ -1,23 +1,27 @@
 import React from "react";
-import { Droppable } from "react-beautiful-dnd";
 import TaskCard from "./TaskCard";
+import { Droppable } from "react-beautiful-dnd";
 
-const Column = ({ droppableId, title, tasks }) => {
+const Column = ({ columnId, title, tasks, updateTask, deleteTask }) => {
   return (
     <div className="column">
       <h2>{title}</h2>
-      <Droppable droppableId={droppableId}>
-        {(provided, snapshot) => (
+      <Droppable droppableId={columnId}>
+        {(provided) => (
           <div
             className="task-list"
             {...provided.droppableProps}
             ref={provided.innerRef}
-            style={{
-              background: snapshot.isDraggingOver ? "#dfe6e9" : "#ecf0f1",
-            }}
           >
             {tasks.map((task, index) => (
-              <TaskCard key={task.id} task={task} index={index} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                index={index}
+                columnId={columnId}
+                updateTask={updateTask}
+                deleteTask={deleteTask}
+              />
             ))}
             {provided.placeholder}
           </div>
