@@ -1,38 +1,132 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-  background: #f1f2f6;
+body.light {
+  background: #f8f9fa;
+  color: #212529;
+}
+
+body.dark {
+  background: #1e1e2f;
+  color: #f1f1f1;
 }
 
 .app {
   padding: 20px;
-  text-align: center;
+  max-width: 1200px;
+  margin: auto;
+  transition: all 0.3s;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
 .board {
   display: flex;
-  justify-content: space-around;
+  flex-direction: row;
+  gap: 1rem;
   margin-top: 20px;
 }
 
+@media (max-width: 768px) {
+  .board {
+    flex-direction: column;
+  }
+}
+
 .column {
-  width: 30%;
-  background: #dcdde1;
+  flex: 1;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 .task-list {
-  min-height: 150px;
-  padding: 10px;
-  border-radius: 5px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .task-card {
   padding: 10px;
-  margin-bottom: 10px;
-  background: white;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: grab;
+}
+
+body.dark .task-card {
+  background: #2c2c3e;
+  color: #f1f1f1;
+}
+
+.task-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+}
+
+body.dark .modal-content {
+  background: #2c2c3e;
+  color: #f1f1f1;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
